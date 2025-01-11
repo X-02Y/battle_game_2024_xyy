@@ -5,6 +5,7 @@ namespace battle_game::unit {
 class Tank : public Unit {
  public:
  mutable uint32_t on_fire = 0;
+ mutable bool explode=false;
   Tank(GameCore *game_core, uint32_t id, uint32_t player_id);
   void Render() override;
   void Update() override;
@@ -14,6 +15,7 @@ class Tank : public Unit {
   void TankMove(float move_speed, float rotate_angular_speed);
   void TurretRotate();
   void Fire();
+  void Explode();
   [[nodiscard]] const char *UnitName() const override;
   [[nodiscard]] const char *Author() const override;
 

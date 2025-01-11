@@ -1,4 +1,5 @@
 #include "tiny_tank.h"
+#include <glm/fwd.hpp>
 
 #include "battle_game/core/bullets/bullets.h"
 #include "battle_game/core/game_core.h"
@@ -88,6 +89,9 @@ void Tank::Update() {
     on_fire--;
     this->SetHealth(this->GetHealth()-0.001*GetMaxHealth()/kTickPerSecond);
   }
+  if(explode){
+    Explode();
+  }
 }
 
 void Tank::TankMove(float move_speed, float rotate_angular_speed) {
@@ -154,6 +158,16 @@ void Tank::Fire() {
   }
 }
 
+void Tank::Explode(){
+  SetHealth(0);
+  for(int i=0;i<10;i++){
+    auto velocity=glm::vec2{rand()%50,rand()%50};
+    GenerateBullet<bullet::CannonBall>(
+            position_ + Rotate({0.0f, 1.2f}, turret_rotation_),
+            turret_rotation_, GetDamageScale()*0.3, velocity);
+  }
+}
+
 bool Tank::IsHit(glm::vec2 position) const {
   position = WorldToLocal(position);
   if(position.x > -0.8f && position.x < 0.8f && position.y > -1.0f &&
@@ -163,7 +177,7 @@ bool Tank::IsHit(glm::vec2 position) const {
             on_fire = 5*kTickPerSecond;
           }
           if(rand()%100<5){
-            this->SetHealth(0);
+            explode=true;
           }
          };
   return position.x > -0.8f && position.x < 0.8f && position.y > -1.0f &&
