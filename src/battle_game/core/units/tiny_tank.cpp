@@ -161,7 +161,9 @@ void Tank::Fire() {
 void Tank::Explode(){
   SetHealth(0);
   for(int i=0;i<10;i++){
-    auto velocity=glm::vec2{rand()%50,rand()%50};
+    //random on circle
+    auto rand_unit=game_core_->RandomOnCircle();
+    auto velocity=glm::vec2{rand_unit.x*10,rand_unit.y*10};
     GenerateBullet<bullet::CannonBall>(
             position_ + Rotate({0.0f, 1.2f}, turret_rotation_),
             turret_rotation_, GetDamageScale()*0.3, velocity);
@@ -173,10 +175,10 @@ bool Tank::IsHit(glm::vec2 position) const {
   if(position.x > -0.8f && position.x < 0.8f && position.y > -1.0f &&
          position.y < 1.0f && position.x + position.y < 1.6f &&
          position.y - position.x < 1.6f){
-          if(rand()%100<30){
+          if(game_core_->RandomFloat()<0.5){
             on_fire = 5*kTickPerSecond;
           }
-          if(rand()%100<5){
+          if(game_core_->RandomFloat()>0.9){
             explode=true;
           }
          };
