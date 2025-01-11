@@ -1,4 +1,4 @@
-#include "tiny_tank.h"
+#include "shotgun_tank.h"
 
 #include "battle_game/core/bullets/bullets.h"
 #include "battle_game/core/game_core.h"
@@ -11,7 +11,7 @@ uint32_t tank_body_model_index = 0xffffffffu;
 uint32_t tank_turret_model_index = 0xffffffffu;
 }  // namespace
 
-Tank::Tank(GameCore *game_core, uint32_t id, uint32_t player_id)
+s_Tank::s_Tank(GameCore *game_core, uint32_t id, uint32_t player_id)
     : Unit(game_core, id, player_id) {
   if (!~tank_body_model_index) {
     auto mgr = AssetsManager::GetInstance();
@@ -70,27 +70,22 @@ Tank::Tank(GameCore *game_core, uint32_t id, uint32_t player_id)
   }
 }
 
-void Tank::Render() {
+void s_Tank::Render() {
   battle_game::SetTransformation(position_, rotation_);
   battle_game::SetTexture(0);
-  battle_game::SetColor(game_core_->GetPlayerColor(player_id_));
+  battle_game::SetColor(game_core_->GetPlayerColor(player_id_+1145));
   battle_game::DrawModel(tank_body_model_index);
   battle_game::SetRotation(turret_rotation_);
   battle_game::DrawModel(tank_turret_model_index);
 }
 
-void Tank::Update() {
+void s_Tank::Update() {
   TankMove(3.0f, glm::radians(180.0f));
   TurretRotate();
   Fire();
-  if(on_fire){
-    //receive damage
-    on_fire--;
-    this->SetHealth(this->GetHealth()-0.001*GetMaxHealth()/kTickPerSecond);
-  }
 }
 
-void Tank::TankMove(float move_speed, float rotate_angular_speed) {
+void s_Tank::TankMove(float move_speed, float rotate_angular_speed) {
   auto player = game_core_->GetPlayer(player_id_);
   if (player) {
     auto &input_data = player->GetInputData();
@@ -122,7 +117,7 @@ void Tank::TankMove(float move_speed, float rotate_angular_speed) {
   }
 }
 
-void Tank::TurretRotate() {
+void s_Tank::TurretRotate() {
   auto player = game_core_->GetPlayer(player_id_);
   if (player) {
     auto &input_data = player->GetInputData();
@@ -135,18 +130,20 @@ void Tank::TurretRotate() {
   }
 }
 
-void Tank::Fire() {
+void s_Tank::Fire() {
   if (fire_count_down_ == 0) {
     auto player = game_core_->GetPlayer(player_id_);
     if (player) {
       auto &input_data = player->GetInputData();
       if (input_data.mouse_button_down[GLFW_MOUSE_BUTTON_LEFT]) {
-        auto velocity = Rotate(glm::vec2{0.0f, 20.0f}, turret_rotation_);
+        auto velocity = Rotate(glm::vec2{0.0f, 22.0f}, turret_rotation_);
+        for(int i=0;i<10;i++){
+          auto rand_velocity= glm::vec2{velocity.x+rand()%7,velocity.y+rand()%7};
         GenerateBullet<bullet::CannonBall>(
             position_ + Rotate({0.0f, 1.2f}, turret_rotation_),
-            turret_rotation_, GetDamageScale(), velocity);
-        fire_count_down_ = kTickPerSecond;  // Fire interval 1 second.
-      }
+            turret_rotation_, GetDamageScale()*0.3, rand_velocity);
+        fire_count_down_ = 1.5*kTickPerSecond;  // Fire interval 1.5 second.
+      }}
     }
   }
   if (fire_count_down_) {
@@ -154,28 +151,19 @@ void Tank::Fire() {
   }
 }
 
-bool Tank::IsHit(glm::vec2 position) const {
+bool s_Tank::IsHit(glm::vec2 position) const {
   position = WorldToLocal(position);
-  if(position.x > -0.8f && position.x < 0.8f && position.y > -1.0f &&
-         position.y < 1.0f && position.x + position.y < 1.6f &&
-         position.y - position.x < 1.6f){
-          if(rand()%100<30){
-            on_fire = 5*kTickPerSecond;
-          }
-          if(rand()%100<5){
-            this->SetHealth(0);
-          }
-         };
   return position.x > -0.8f && position.x < 0.8f && position.y > -1.0f &&
          position.y < 1.0f && position.x + position.y < 1.6f &&
          position.y - position.x < 1.6f;
 }
 
-const char *Tank::UnitName() const {
-  return "Tiny Tank";
+const char *s_Tank::UnitName() const {
+  return "shotgun_tank";
 }
 
-const char *Tank::Author() const {
-  return "LazyJazz";
+const char *s_Tank::Author() const {
+  return "X-02Y";
 }
 }  // namespace battle_game::unit
+
