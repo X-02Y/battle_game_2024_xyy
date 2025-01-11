@@ -73,7 +73,7 @@ x_Tank::x_Tank(GameCore *game_core, uint32_t id, uint32_t player_id)
 void x_Tank::Render() {
   battle_game::SetTransformation(position_, rotation_);
   battle_game::SetTexture(0);
-  battle_game::SetColor(game_core_->GetPlayerColor(player_id_+114));
+  battle_game::SetColor(game_core_->GetPlayerColor(player_id_+1145));
   battle_game::DrawModel(tank_body_model_index);
   battle_game::SetRotation(turret_rotation_);
   battle_game::DrawModel(tank_turret_model_index);
@@ -136,10 +136,10 @@ void x_Tank::Fire() {
     if (player) {
       auto &input_data = player->GetInputData();
       if (input_data.mouse_button_down[GLFW_MOUSE_BUTTON_LEFT]) {
-        auto velocity = Rotate(glm::vec2{0.0f, 20.0f}, turret_rotation_);
+        auto velocity = Rotate(glm::vec2{0.0f, 80.0f}, turret_rotation_);
         GenerateBullet<bullet::CannonBall>(
             position_ + Rotate({0.0f, 1.2f}, turret_rotation_),
-            turret_rotation_, GetDamageScale(), velocity);
+            turret_rotation_, GetDamageScale()*0.2, velocity);
         fire_count_down_ = 0.1*kTickPerSecond;  // Fire interval 0.1 second.
       }
     }
